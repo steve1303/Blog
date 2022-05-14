@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>layout 管理系统大布局 - Layui</title>
+    <link rel="stylesheet" href="/layui/css/layui.css">
+    <style>
+        /*设置按钮外边距*/
+        .m_10 {
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+
+
+<div class="layui-container">
+
+    <!-- 顶部导航栏-->
+    <ul class="layui-nav" lay-bar="disabled">
+        <li class="layui-nav-item">
+            <a th:href="@{/index}">首页</a>
+        </li>
+
+        <div class="layui-nav-item layui-layout-right">
+            <div shiro:lacksPermission="user:admin,user:common">
+                <!--身份为游客时 显示下面的标签-->
+                <li class="layui-nav-item">
+                    <a th:href="@{/toLogin}">登录</a>
+                </li>
+                <li class="layui-nav-item">
+                    <a th:href="@{/toRegister}">注册</a>
+                </li>
+            </div>
+        </div>
+
+        <div shiro:hasAnyPermissions="user:admin,user:common">
+            <div class="layui-nav-item layui-layout-right" lay-unselect="">
+                <li class="layui-nav-item">
+                    <a th:text="'UID '+${session.userid}"></a>
+                </li>
+                <li class="layui-nav-item">
+                    <a href="javascript:;">
+                        <!-- 头像 -->
+                        <img th:src="@{/images/1.jpg}" class="layui-nav-img">
+                        <!-- 用户名 -->
+                        <span style="color: #ffffff" th:text="'你好,'+${session.loginUser}+'!'"><i
+                                class="layui-icon layui-icon-username"></i></span>
+                    </a>
+                    <dl class="layui-nav-child">
+                        <dd><a th:href="@{/userMsg/{userId}(userId=${session.userid})}">查看个人信息</a></dd>
+                        <dd><a th:href="@{/blog}">发布博客</a></dd>
+                        <dd><a th:href="@{/changePwd/{userId}(userId=${session.userid})}"></i>修改密码</a></dd>
+                        <dd><a th:href="@{/dashboard}">博客后台</a></dd>
+                        <hr>
+                        <dd style="text-align: center;"><a th:href="@{/logout}">退出</a></dd>
+                    </dl>
+                </li>
+                <li class="layui-nav-item" lay-header-event="menuRight" lay-unselect>
+                    <a href="javascript:;">
+                        <i class="layui-icon layui-icon-more-vertical"></i>
+                    </a>
+                </li>
+            </div>
+        </div>
+    </ul>
+
+
+    <!--内容主题区域-->
+    <div class="layui-row">
+        <!--左侧部分-->
+        <div class="layui-col-md1">
+            <br>
+        </div>
+        <div class="layui-col-md7">
+
+            <br>
+            <!-- 搜索框-->
+            <div class="layui-inline">
+                <form class="layui-form" th:action="@{/queryBlog}" th:method="post">
+                    <label class="layui-form-label">搜索</label>
+                    <div class="layui-input-inline">
+                        <input id="testTxt" class="layui-input" type="text" th:name="keyword"
+                               placeholder="标题/内容/分类/浏览量">
+                    </div>
+                </form>
+            </div>
+
+            <br>
+            <br>
+            <br>
+
+            <!-- 标签 -->
+            <div>
+                <span class="layui-breadcrumb" lay-separator="|" th:each="tag,loopStatus:${allTags}">
+                    <a th:text="${tag.tagName}+' '" href=""></a>
+                    <div th:if="${loopStatus.index}  eq 8"><br></div>
+                </span>
+            </div>
+
+            <br>
+            <br>
+            <br>
+
+
+            <!--  判断 当传过来的transactionByName 为空时 显示 没有交易记录信息-->
+            <div th:if="${#lists.isEmpty(pageInfo.list)}">
+                <div>没有博客信息</div>
+            </div>
+            <!--  判断 当传过来的transactionByName 不为空时 显示表格-->
+            <div th:if="${not #lists.isEmpty(pageInfo.list)}">
+                <div th:each="blog:${pageInfo.list}">
+
+                    <article id="box">
+                        <div class="layui-font-blue"
+                             th:text="${#dates.format(blog.blogCreatDate,'yyyy-MM-dd HH:mm:ss')}"></div>
+
+                        <h1>
+                            <a class="layui-font-cyan" th:href="@{/p/{blogId}(blogId=${blog.blogId})}"
+                               th:text="${blog.blogTitle}"></a>
+                        </h1>
+                        <div class="layui-inline" th:text="${blog.blogViews}"></div>
+                        <div class="layui-inline" th:text="'分类：'+${blog.blogCategory}"></div>
+                        <br>
+                        <a class="layui-font-cyan layui-font-12" th:href="@{/p/{blogId}(blogId=${blog.blogId})}"><i
+                                class="layui-icon layui-icon-right"></i>阅读全文...</a>
+
+                    </article>
+                    <hr>
+                    <br>
+
+                </div>
+            </div>
+
+
+            <!--分页-->
+            <div id="demo07">
+                <div class="layui-box layui-laypage layui-laypage-default" id="layui-laypage-10">
+                    <!--当前页 总页数 总记录数-->
+                    <span class="layui-laypage-count">当前第 [[${pageInfo.pageNum}]]页,共 [[${pageInfo.pages}]] 页.一共
+                        [[${pageInfo.total}]] 条记录
+                    </span>
+
+                    <!--上一页-->
+                    <a class="layui-laypage-prev" th:if="${pageInfo.hasPreviousPage}"
+                       th:href="'/index?pageNum='+${pageInfo.prePage}">上一页</a>
+
+                    <!--下一页-->
+                    <a class="layui-laypage-next" th:if="${pageInfo.hasNextPage}"
+                       th:href="'/index?pageNum='+${pageInfo.nextPage}">下一页</a>
+
+                    <!-- 刷新 -->
+                    <a th:href="@{/index}" data-page="1" class="layui-laypage-refresh">
+                        <i class="layui-icon layui-icon-refresh"></i>
+                    </a>
+
+
+                </div>
+            </div>
+
+
+        </div>
+        <!--右侧部分-->
+        <div class="layui-col-md3">
+
+            <fieldset class="layui-elem-field layui-field-title" style="margin-top: 30px;">
+                <legend>最新博客</legend>
+            </fieldset>
+            <blockquote class="layui-elem-quote">
+                <div th:each="blog:${blogsNew}">
+                    <a th:text="${blog.blogTitle}" th:href="@{/p/{blogId}(blogId=${blog.blogId})}"></a>
+                </div>
+            </blockquote>
+
+            <fieldset class="layui-elem-field layui-field-title" style="margin-top: 30px;">
+                <legend>热门博客</legend>
+            </fieldset>
+            <blockquote class="layui-elem-quote">
+                <div th:each="blog:${blogsHot}">
+                    <a th:text="${blog.blogTitle}+' '+${blog.blogViews}"
+                       th:href="@{/p/{blogId}(blogId=${blog.blogId})}"></a>
+                </div>
+            </blockquote>
+
+        </div>
+        <div class="layui-col-md1">
+            <br>
+        </div>
+
+    </div>
+
+    <div class="layui-footer">
+        <!-- 底部固定区域 -->
+        <div style="text-align: center;">
+            <div class="layui-inline">
+                <div class="center">底部固定区域</div>
+                <br>
+                <br>
+                <br>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="/layui/layui.js"></script>
+<script>
+    layui.use(['util', 'laydate', 'layer'], function () {
+        var util = layui.util
+            , laydate = layui.laydate
+            , $ = layui.$
+            , layer = layui.layer;
+        //固定块
+        util.fixbar({
+            bar1: false
+            , bar2: false
+            , css: {right: 50, bottom: 100}
+            , bgcolor: '#393D49'
+            , click: function (type) {
+                if (type === 'bar1') {
+                    layer.msg('icon 是可以随便换的')
+                } else if (type === 'bar2') {
+                    layer.msg('两个 bar 都可以设定是否开启')
+                }
+            }
+        });
+    });
+</script>
+<script>
+    layui.use('element', function(){
+        var element = layui.element; //导航的hover效果、二级菜单等功能，需要依赖element模块
+
+        //监听导航点击
+        element.on('nav(demo)', function(elem){
+            //console.log(elem)
+            layer.msg(elem.text());
+        });
+    });
+</script>
+
+</body>
+</html>

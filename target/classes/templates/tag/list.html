@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<!--suppress ALL-->
+<!-- 压制所有警告 -->
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>标签列表</title>
+    <link rel="stylesheet" href="/layui/css/layui.css">
+    <style>
+        /*设置按钮外边距*/
+        .m_10 {
+            margin: 10px;
+        }
+
+        span {
+            margin-left: -5px;
+        !important;
+        }
+    </style>
+</head>
+<body>
+
+<div class="layui-layout layui-layout-admin">
+    <!--顶部导航栏-->
+    <div th:insert="~{common/common::topnav}"></div>
+    <!--左侧导航栏-->
+    <div th:insert="~{common/common::sidenav(active='tag/list.html')}"></div>
+    <!-- 内容主体区域 -->
+    <div class="layui-body">
+
+        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4 m_10">
+            <!-- 去添加用户的页面 get方法 ok-->
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <div class="layui-btn-container m_10">
+                        <a class="btn btn-sm btn-success layui-btn inline" th:href="@{/tag}">添加标签</a>
+                        <a class="btn btn-sm btn-success layui-btn inline" th:href="@{/tags}">查看所有标签</a>
+                    </div>
+                </div>
+<!--                <div class="layui-inline">
+                    <form class="layui-form" th:action="@{/query}" th:method="get">
+                        <label class="layui-form-label">搜索</label>
+                        <div class="layui-input-inline">
+                            <input class="layui-input" type="text" th:name="searchParam" placeholder="id/用户名/手机号/邮箱">
+                        </div>
+                    </form>
+                </div>-->
+            </div>
+            <!--表格 显示数据-->
+
+            <!--  判断 当传过来的transactionByName 为空时 显示 没有交易记录信息-->
+            <div th:if="${#lists.isEmpty(pageInfo.list)}">
+                <div>没有用户信息</div>
+            </div>
+            <!--  判断 当传过来的transactionByName 不为空时 显示表格-->
+            <div th:if="${not #lists.isEmpty(pageInfo.list)}">
+
+                <div class="layui-form">
+                    <table class="layui-table">
+                        <thead>
+                        <tr>
+                            <th>标签id</th>
+                            <th>标签名</th>
+                            <th>创建时间</th>
+                            <th>是否被删除</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="tag:${pageInfo.list}">
+                            <td th:text="${tag.tagId}"></td>
+                            <td th:text="${tag.tagName}"></td>
+                            <td th:text="${#dates.format(tag.tagCreateTime,'yyyy-MM-dd HH:mm:ss')}"></td>
+                            <td th:text="${tag.isDeleted==0?'未删除':'删除'}"></td>
+                            <td>
+                                <a class="layui-btn layui-btn-xs"
+                                   th:href="@{/tag/{tagId}(tagId=${tag.tagId})}">编辑</a>
+                                <a onclick="return confirm('确定删除吗？')" class="layui-btn layui-btn-danger layui-btn-xs"
+                                   th:href="@{/deltag/{tagId}(tagId=${tag.tagId})}">删除</a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+
+
+            <!--分页-->
+            <div id="demo07">
+                <div class="layui-box layui-laypage layui-laypage-default" id="layui-laypage-10">
+                    <!--当前页 总页数 总记录数-->
+                    <span class="layui-laypage-count">当前第 [[${pageInfo.pageNum}]]页,共 [[${pageInfo.pages}]] 页.一共
+                        [[${pageInfo.total}]] 条记录
+                    </span>
+
+                    <!--上一页-->
+                    <a class="layui-laypage-prev" th:if="${pageInfo.hasPreviousPage}"
+                       th:href="'/tags?pageNum='+${pageInfo.prePage}">上一页</a>
+
+                    <!--遍历条数 iterStat状态变量 只遍历前五个-->
+                    <span th:each="nav:${pageInfo.navigatepageNums}">
+                            <a class="layui-laypage-curr" th:href="'/tags?pageNum='+${nav}" th:text="${nav}"
+                               th:if="${nav != pageInfo.pageNum}"></a>
+                            <em class="layui-laypage-em" th:if="${nav == pageInfo.pageNum}"
+                                th:text="${nav}"></em>
+                    </span>
+
+                    <!--下一页-->
+                    <a class="layui-laypage-next" th:if="${pageInfo.hasNextPage}"
+                       th:href="'/tags?pageNum='+${pageInfo.nextPage}">下一页</a>
+
+                    <!-- 刷新 -->
+                    <a th:href="@{/tags}" data-page="1" class="layui-laypage-refresh">
+                        <i class="layui-icon layui-icon-refresh"></i>
+                    </a>
+
+
+                </div>
+            </div>
+
+
+        </main>
+
+        <br>
+        <br>
+        <br>
+
+    </div>
+    <!--底部固定区域-->
+    <div th:insert="~{common/common::footnav}"></div>
+</div>
+
+<script src="/layui/layui.js"></script>
+</script>
+
+</body>
+</html>

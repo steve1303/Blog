@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kuang.dao.TagMapper">
+
+    <resultMap id="tagMap" type="com.kuang.pojo.Tag">
+        <id column="tag_id" property="tagId"/>
+        <result column="tag_name" property="tagName"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="tag_create_time" property="tagCreateTime"/>
+    </resultMap>
+
+    <!-- crud -->
+    <select id="getAllTags" resultMap="tagMap">
+        select *
+        from tag
+    </select>
+
+    <select id="getTagById" parameterType="int" resultMap="tagMap">
+        select *
+        from tag
+        where tag_id = #{tagId};
+    </select>
+
+    <insert id="addTag" parameterType="com.kuang.pojo.Tag">
+        insert into tag (tag_id, tag_name, is_deleted, tag_create_time)
+        values (#{tagId}, #{tagName}, #{isDeleted}, now());
+    </insert>
+
+    <update id="updateTag" parameterType="com.kuang.pojo.Tag">
+        update tag
+        set tag_id=#{tagId},
+            tag_name=#{tagName},
+            is_deleted=#{isDeleted}
+        where tag_id = #{tagId};
+    </update>
+
+    <delete id="deleteTagById" parameterType="int">
+        delete
+        from tag
+        where tag_id = #{tagId};
+    </delete>
+
+
+
+    <!--获得标签总数-->
+    <select id="getTagCount" resultType="int">
+        select count(*)
+        from tag
+    </select>
+
+
+</mapper>

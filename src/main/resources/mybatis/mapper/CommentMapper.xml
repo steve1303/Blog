@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kuang.dao.CommentMapper">
+
+    <resultMap id="commentMap" type="com.kuang.pojo.Comment">
+        <id column="comment_id" property="commentId"/>
+        <result column="parent_comment_id" property="parentCommentId"/>
+        <result column="comment_like_count" property="commentLikeCount"/>
+        <result column="comment_create_time" property="commentCreateTime"/>
+        <result column="comment_content" property="commentContent"/>
+        <result column="comment_status" property="commentStatus"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="user_id" property="userId"/>
+        <result column="blog_id" property="blogId"/>
+        <association property="user" javaType="User">
+            <id column="user_id" property="userId"/>
+            <result column="user_name" property="userName"/>
+        </association>
+    </resultMap>
+
+    <!-- crud -->
+    <select id="getAllComments" resultMap="commentMap">
+        select *
+        from comment
+    </select>
+
+    <!-- 根据 评论id 查询 -->
+    <select id="getCommentById" parameterType="int" resultMap="commentMap">
+        select *
+        from comment
+        where comment_id = #{commentId};
+    </select>
+
+
+
+    <!--根据博客id查询该博客文章下的所有评论 不包括 逻辑删除的-->
+    <select id="getAllCommentsByBlogId" parameterType="int" resultMap="commentMap">
+        select *
+        from user inner join comment on user.user_id = comment.user_id
+        where blog_id = #{blogId} and comment.parent_comment_id = 0 and comment.is_deleted = 0;
+    </select>
+
+    <!--根据博客id查询该博客文章下的所有回复 不包括 逻辑删除的-->
+    <select id="getAllRepliesByBlogId" resultMap="commentMap">
+        select *
+        from user inner join comment on user.user_id = comment.user_id
+        where blog_id = #{blogId} and comment.parent_comment_id != 0 and comment.is_deleted = 0;
+    </select>
+
+
+
+
+    <insert id="addComment" parameterType="com.kuang.pojo.Comment">
+        insert into comment (comment_id, user_id, blog_id, comment_like_count, comment_create_time, comment_content,
+                             parent_comment_id, comment_status, is_deleted)
+        values (#{commentId}, #{userId}, #{blogId}, #{commentLikeCount}, #{commentCreateTime}, #{commentContent},
+                #{parentCommentId}, #{commentStatus}, #{isDeleted});
+    </insert>
+
+    <update id="updateComment" parameterType="com.kuang.pojo.Comment">
+        update comment
+        set comment_id=#{commentId},
+            user_id=#{userId},
+            blog_id=#{blogId},
+            comment_like_count=#{commentLikeCount},
+            comment_create_time=#{commentCreateTime},
+            comment_content=#{commentContent},
+            parent_comment_id=#{parentCommentId},
+            comment_status=#{commentStatus},
+            is_deleted=#{isDeleted}
+        where comment_id = #{commentId};
+    </update>
+
+    <!--逻辑删除 0 未删除 1 已删除 -->
+    <update id="removeCommentLogic" parameterType="int">
+        update comment
+        SET is_deleted = 1
+        WHERE
+            comment_id =#{commentId}
+    </update>
+
+    <delete id="deleteCommentById" parameterType="int">
+        delete
+        from comment
+        where comment_id = #{CommentId};
+    </delete>
+
+
+    <select id="getCommentCount" resultType="int">
+        select count(*)
+        from comment
+    </select>
+
+</mapper>

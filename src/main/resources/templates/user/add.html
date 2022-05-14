@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>添加用户页面</title>
+    <link rel="stylesheet" href="/layui/css/layui.css">
+    <style>
+        /*设置按钮外边距*/
+        .m_10 {
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="layui-layout layui-layout-admin">
+    <!--顶部导航栏-->
+    <div th:insert="~{common/common::topnav}"></div>
+    <!--左侧导航栏-->
+    <div th:insert="~{common/common::sidenav(active='user/list.html')}"></div>
+    <!-- 内容主体区域 -->
+    <div class="layui-body">
+
+        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4 m_10">
+            <!-- 添加用户的表单 post 方法 -->
+            <form class="layui-form" th:action="@{/user}" method="post" >
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label"><i class="layui-font-red">*</i>用户名</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="userName" lay-verify="required" placeholder="请输入用户名"
+                               autocomplete="off" class="layui-input">
+                        <!-- lay-verify="required" 必填项-->
+                    </div>
+                </div>
+
+                <!--密码-->
+                <div class="layui-form-item">
+                    <label class="layui-form-label"><i class="layui-font-red">*</i>密码</label>
+                    <div class="layui-input-inline">
+                        <input type="password" name="userPassword" lay-verify="required|password" placeholder="请输入密码"
+                               autocomplete="off"
+                               class="layui-input">
+                        <!-- autocomplete="off"	规定禁用自动完成功能
+                        pass 自定义验证规则-->
+                    </div>
+                    <div class="layui-form-mid layui-word-aux">请填写6到12位密码</div>
+                </div>
+
+                <!--手机号 邮箱-->
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <label class="layui-form-label"><i class="layui-font-red">*</i>手机号</label>
+                        <div class="layui-input-inline">
+                            <input type="tel" name="userPhone" lay-verify="required|phone" autocomplete="on"
+                                   class="layui-input">
+                        </div>
+                    </div>
+
+                    <div class="layui-inline">
+                        <label class="layui-form-label"><i class="layui-font-red">*</i>邮箱</label>
+                        <div class="layui-input-inline">
+                            <input type="text" name="userEmail" lay-verify="required|email" autocomplete="on"
+                                   class="layui-input">
+                        </div>
+                    </div>
+                </div>
+
+
+                <!--用户权限 隐藏域 传值-->
+                <input type="hidden" name="userPerms" value="user:common">
+
+
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                        <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1">立即提交</button>
+                        <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                    </div>
+                </div>
+            </form>
+
+
+
+        </main>
+    </div>
+
+
+    <!--底部固定区域-->
+    <div th:insert="~{common/common::footnav}"></div>
+</div>
+
+<script src="/layui/layui.js"></script>
+</script>
+<script>
+    layui.use(['form', 'layedit', 'laydate'], function () {
+        var form = layui.form
+            , layedit = layui.layedit;
+
+        //自定义验证规则
+        form.verify({
+            title: function (value) {
+                if (value.length < 5) {
+                    return '标题至少得5个字符啊';
+                }
+            }
+            , password: [
+                /^[\S]{6,12}$/
+                , '密码必须6到12位，且不能出现空格'
+            ]
+            , content: function (value) {
+                layedit.sync(editIndex);
+            },
+            phonemsg: function (value, item) { //value：表单的值、item：表单的DOM对象
+                if (value != "") {  //值不是空的时候再去走验证
+                    if (!/^1[3|4|5|7|8]\d{9}$/.test(value)) {
+                        undefined
+                        return '手机号格式不正确';
+                    }
+                }
+            },
+        });
+
+    });
+</script>
+
+
+
+</body>
+</html>

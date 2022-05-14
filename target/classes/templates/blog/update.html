@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>修改信息</title>
+    <link rel="stylesheet" href="/layui/css/layui.css">
+
+
+    <link rel="stylesheet" th:href="@{/editormd/css/editormd.css}"/>
+    <link rel="shortcut icon" href="https://pandao.github.io/editor.md/favicon.ico" type="image/x-icon"/>
+
+    <style>
+        /*设置按钮外边距*/
+        .m_10 {
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+
+
+<div class="layui-layout layui-layout-admin">
+    <!--顶部导航栏-->
+    <div th:insert="~{common/common::topnav}"></div>
+    <!--左侧导航栏-->
+    <div th:insert="~{common/common::sidenav(active='blog/list.html')}"></div>
+    <!-- 内容主体区域 -->
+    <div class="layui-body">
+
+        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4 m_10">
+            <!-- 修改用户的表单 post 方法-->
+            <form class="layui-form" th:action="@{/updateBlog}" method="post">
+
+                <!-- 修改必须传入id 隐藏  layui-hide-->
+                <div class="layui-form-item">
+                    <label class="layui-form-label">博客id</label>
+                    <div class="layui-input-block">
+                        <input th:value="${blog.blogId}" type="text" name="blogId" autocomplete="off"
+                               class="layui-input layui-disabled" readonly="readonly">
+                        <!-- bug 禁用功能使用readonly disabled不会发送给服务器 -->
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label"><i class="layui-font-red">*</i>博客标题</label>
+                    <div class="layui-input-block">
+                        <input th:value="${blog.blogTitle}" lay-verify="required" type="text" name="blogTitle"
+                               autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+
+                <!-- 文本域 textarea value 必须用行内写法-->
+                <!-- markdown 编辑器-->
+               <div class="layui-form-item">
+                    <label class="layui-form-label"><i class="layui-font-red">*</i>博客内容</label>
+                    <div class="layui-input-block">
+                        <div id="editor">
+                            <textarea name="blogContent" style="display:none;">[[${blog.blogContent}]]</textarea>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- 日期时间选择器  id="test5"  js 代码 pojo实体类注解 @DateTimeFormat -->
+                <div class="layui-form-item">
+                    <label class="layui-form-label">初次创建日期</label>
+                    <div class="layui-input-inline">
+                        <input th:value="${#dates.format(blog.blogCreatDate,'yyyy-MM-dd HH:mm:ss')}" id="test1"
+                               type="text" name="blogCreatDate" lay-verify="required"
+                               autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">最新修改日期</label>
+                    <div class="layui-input-inline">
+                        <input th:value="${#dates.format(blog.blogAlterTime,'yyyy-MM-dd HH:mm:ss')}" id="test2"
+                               type="text" name="blogAlterTime" lay-verify="required"
+                               autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+
+                <!-- 博客分类 下拉框 selected 选中 -->
+                <div class="layui-form-item">
+                    <label class="layui-form-label">博客分类</label>
+                    <div class="layui-input-block">
+                        <select name="blogCategory">
+                            <option th:each="category:${allCategories}"
+                                    th:value="${category.categoryName}"
+                                    th:text="${category.categoryName}"
+                                    th:selected="${category.categoryName} eq ${blog.blogCategory}">
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 复选框 博客标签-->
+                <div class="layui-form-item">
+                    <label class="layui-form-label">博客标签</label>
+                    <div class="layui-input-block fixed">
+                        <input type="checkbox" name="blogTags" lay-filter="tagid"
+                               th:each="tag:${allTags}"
+                               th:title="${tag.tagName}"
+                               th:value="${tag.tagId}"
+                               th:checked="${#lists.contains(tagList, tag.tagId)}">
+                    </div>
+
+                </div>
+
+
+                <!-- 博客状态 单选框 -->
+                <div class="layui-form-item">
+                    <label class="layui-form-label"><i class="layui-font-red">*</i>博客状态</label>
+                    <div class="layui-input-block">
+                        <input class="layui-radio" type="radio" name="blogStatus" value="发布" title="发布"
+                               th:checked="${blog.blogStatus=='发布'}">
+                        <input class="layui-radio" type="radio" name="blogStatus" value="草稿" title="草稿"
+                               th:checked="${blog.blogStatus=='草稿'}">
+                        <input class="layui-radio" type="radio" name="blogStatus" value="回收站" title="回收站"
+                               th:checked="${blog.blogStatus=='回收站'}">
+                    </div>
+                </div>
+
+
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                        <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1">修改</button>
+                    </div>
+                </div>
+
+            </form>
+
+            <br>
+            <br>
+            <br>
+
+        </main>
+
+    </div>
+    <!--底部固定区域-->
+    <div th:insert="~{common/common::footnav}"></div>
+</div>
+
+
+<script th:src="@{/editormd/jquery.min.js}"></script>
+<script th:src="@{/editormd/editormd.js}"></script>
+<script type="text/javascript">
+
+    $(function () {
+
+        var editor = editormd("editor", {
+            width: "100%",
+            height: "1000px",
+            path: "/editormd/lib/"
+        });
+    });
+
+</script>
+
+<script src="/layui/layui.js">
+</script>
+<script>
+    layui.use(['form', 'layedit', 'laydate'], function () {
+        var form = layui.form
+            , laydate = layui.laydate;
+
+        //自定义验证规则
+        form.verify({
+            title: function (value) {
+                if (value.length < 5) {
+                    return '标题至少得5个字符啊';
+                }
+            }
+            , pass: [
+                /^[\S]{6,12}$/
+                , '密码必须6到12位，且不能出现空格'
+            ]
+            , content: function (value) {
+                layedit.sync(editIndex);
+            },
+        });
+
+        //日期时间选择器
+        laydate.render({
+            elem: '#test1'
+            , type: 'datetime'
+            , format: 'yyyy-MM-dd HH:mm:ss'
+        });
+        laydate.render({
+            elem: '#test2'
+            , type: 'datetime'
+            , format: 'yyyy-MM-dd HH:mm:ss'
+        });
+
+    });
+</script>
+
+</body>
+</html>

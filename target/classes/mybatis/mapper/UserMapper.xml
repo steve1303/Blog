@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kuang.dao.UserMapper">
+
+    <resultMap id="userMap" type="com.kuang.pojo.User">
+        <id column="user_id" property="userId"/>
+        <result column="user_name" property="userName"/>
+        <result column="user_password" property="userPassword"/>
+        <result column="user_photo" property="userPhoto"/>
+        <result column="user_phone" property="userPhone"/>
+        <result column="user_email" property="userEmail"/>
+        <result column="user_creat_time" property="userCreatTime"/>
+        <result column="user_perms" property="userPerms"/>
+        <collection property="blogs" ofType="Blog">
+            <result column="blog_id" property="blogId"/>
+            <result column="blog_title" property="blogTitle"/>
+            <result column="blog_content" property="blogContent"/>
+            <result column="blog_views" property="blogViews"/>
+            <result column="blog_comment_count" property="blogCommentCount"/>
+            <result column="blog_status" property="blogStatus"/>
+            <result column="blog_category" property="blogCategory"/>
+            <result column="blog_alter_time" property="blogAlterTime"/>
+            <result column="blog_creat_date" property="blogCreatDate"/>
+            <result column="user_id" property="userId"/>
+        </collection>
+        <collection property="categories" ofType="Category">
+            <id column="category_id" property="categoryId"/>
+            <result column="category_name" property="categoryName"/>
+            <result column="category_description" property="categoryDescription"/>
+            <result column="is_deleted" property="isDeleted"/>
+            <result column="category_create_time" property="categoryCreateTime"/>
+            <result column="user_id" property="userId"/>
+        </collection>
+    </resultMap>
+
+
+    <!-- 复杂查询 根据用户id 查询用户的博客-->
+    <select id="getUserBlogs" resultMap="userMap">
+        SELECT u.user_id       uid,
+               u.user_name     uname,
+               b.blog_id       bid,
+               b.blog_title    btitle,
+               b.blog_content  bcontent,
+               b.blog_category bcategory,
+               b.blog_status   bstatus
+        FROM user u,
+             blog b
+        WHERE u.user_id = b.user_id
+          AND u.user_id = #{userId};
+    </select>
+
+
+    <!-- crud -->
+    <!-- 不要加 分号-->
+    <select id="getAllUsers" resultMap="userMap">
+        select *
+        from user
+    </select>
+
+    <select id="getUserById" parameterType="int" resultMap="userMap">
+        select *
+        from user
+        where user_id = #{userId};
+    </select>
+
+    <insert id="addUser" parameterType="com.kuang.pojo.User">
+        insert into user (user_id, user_name, user_password, user_photo, user_phone,
+                          user_email, user_creat_time, user_perms)
+        values (#{userId}, #{userName}, #{userPassword}, #{userPhoto}, #{userPhone},
+                #{userEmail}, now(), #{userPerms});
+    </insert>
+
+    <update id="updateUser" parameterType="com.kuang.pojo.User">
+        update user
+        set user_id=#{userId},
+            user_name=#{userName},
+            user_password=#{userPassword},
+            user_phone=#{userPhone},
+            user_phone=#{userPhone},
+            user_email=#{userEmail},
+            user_creat_time=#{userCreatTime},
+            user_perms=#{userPerms}
+        where user_id = #{userId};
+    </update>
+
+    <!--彻底删除-->
+    <delete id="deleteUserById" parameterType="int">
+        delete
+        from user
+        where user_id = #{userId};
+    </delete>
+
+
+    <!--shiro-->
+    <!-- 根据用户名查询用户 -->
+    <select id="queryUserByName" parameterType="String" resultMap="userMap">
+        select *
+        from user
+        where user_name = #{userName};
+    </select>
+
+    <!-- 根据用户名查询用户id -->
+    <select id="selectIdByName" parameterType="String" resultType="int">
+        select user_id
+        from user
+        where user_name = #{userName};
+    </select>
+
+
+    <!--条件查询 query 搜索用户-->
+    <select id="getAllUsersIF" parameterType="String" resultMap="userMap">
+        select *
+        from user
+        <where>
+            <if test="searchParam != null and searchParam !=''">
+                and CONCAT(user_id, user_name,user_password,user_phone,user_email) LIKE CONCAT('%',#{searchParam},'%')
+            </if>
+        </where>
+    </select>
+
+    <!-- 修改密码 -->
+    <update id="updateUserPassword" parameterType="com.kuang.pojo.User">
+        update user
+        set user_password=#{new_password}
+        where user_id = #{userId};
+    </update>
+
+</mapper>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>添加标签页面</title>
+    <link rel="stylesheet" href="/layui/css/layui.css">
+
+
+    <link rel="stylesheet" th:href="@{/editormd/css/editormd.css}"/>
+    <link rel="shortcut icon" href="https://pandao.github.io/editor.md/favicon.ico" type="image/x-icon"/>
+
+
+    <style>
+        /*设置按钮外边距*/
+        .m_10 {
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+
+
+<main role="main" class="col-md-12 ml-sm-auto col-lg-10 pt-3 px-4 m_10">
+    <!-- 添加用户的表单 post 方法 -->
+    <form class="layui-form" th:action="@{/blog}" method="post">
+
+        <div class="layui-form-item">
+            <label class="layui-form-label"><i class="layui-font-red">*</i>博客标题</label>
+            <div class="layui-input-block">
+                <input type="text" name="blogTitle" lay-verify="title" placeholder="请输入博客标题"
+                       autocomplete="off" class="layui-input">
+            </div>
+        </div>
+
+        <input type="hidden" name="blogViews"  th:value="0">
+        <input type="hidden" name="blogCommentCount"  th:value="0">
+
+
+        <!--markdown编辑器 -->
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label"><i class="layui-font-red">*</i>博客内容</label>
+            <div class="layui-input-block">
+                <div id="editor">
+                    <textarea lay-verify="required" name="blogContent" style="display:none;"></textarea>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- 博客分类 下拉框 -->
+        <div class="layui-form-item">
+            <label class="layui-form-label">博客分类</label>
+            <div class="layui-input-inline">
+                <select name="blogCategory" lay-filter="aihao">
+                    <option value="" selected hidden></option>
+                    <option th:each="class:${allCategories}"
+                            th:value="${class.categoryName}"
+                            th:text="${class.categoryName}">
+                    </option>
+                </select>
+            </div>
+        </div>
+
+        <!-- 复选框 博客标签-->
+        <div class="layui-form-item">
+            <label class="layui-form-label">博客标签</label>
+            <div class="layui-input-block fixed">
+                <input th:each="tag:${allTags}" th:title="${tag.tagName}" type="checkbox" name="blogTags"
+                       lay-filter="tagid" th:value="${tag.tagId}" lay-verify="required">
+            </div>
+        </div>
+
+        <!-- 博客状态  单选框 -->
+        <div class="layui-form-item">
+            <label class="layui-form-label"><i class="layui-font-red">*</i>博客状态</label>
+            <div class="layui-input-block">
+                <input class="layui-radio" type="radio" name="blogStatus" value="发布" title="发布" checked>
+                <input class="layui-radio" type="radio" name="blogStatus" value="草稿" title="草稿">
+                <input class="layui-radio" type="radio" name="blogStatus" value="回收站" title="回收站">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1">发布博客</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </div>
+    </form>
+
+</main>
+<br>
+<br>
+<br>
+
+
+<script th:src="@{/editormd/jquery.min.js}"></script>
+<script th:src="@{/editormd/editormd.js}"></script>
+<script type="text/javascript">
+    $(function () {
+        var editor = editormd("editor", {
+            width: "100%",
+            height: 800,
+            autoFloatEnabled: false,//是否保持toolbar的位置不动
+            autoHeightEnabled: false,//是否自动长高
+            // markdown: "xxxx",     // dynamic set Markdown text
+            path: "/editormd/lib/"  // 注意 加 /
+        });
+    });
+</script>
+
+
+<script src="/layui/layui.js"></script>
+</script>
+<script>
+    layui.use(['form', 'layedit', 'laydate'], function () {
+        var form = layui.form;
+
+        //自定义验证规则
+        form.verify({
+            title: function (value) {
+                if (value.length < 5) {
+                    return '标题至少得5个字符啊';
+                }
+            }
+            , pass: [
+                /^[\S]{6,12}$/
+                , '密码必须6到12位，且不能出现空格'
+            ]
+            , content: function (value) {
+                layedit.sync(editIndex);
+            }
+        });
+
+    });
+</script>
+
+</body>
+</html>

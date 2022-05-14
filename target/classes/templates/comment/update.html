@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>修改</title>
+    <link rel="stylesheet" href="/layui/css/layui.css">
+    <style>
+        /*设置按钮外边距*/
+        .m_10 {
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+
+
+<div class="layui-layout layui-layout-admin">
+    <!--顶部导航栏-->
+    <div th:insert="~{common/common::topnav}"></div>
+    <!--左侧导航栏-->
+    <div th:insert="~{common/common::sidenav(active='comment/list.html')}"></div>
+    <!-- 内容主体区域 -->
+    <div class="layui-body">
+
+        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4 m_10">
+            <!-- 修改用户的表单 post 方法-->
+            <form class="layui-form" th:action="@{/updateComment}" method="post">
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">评论id</label>
+                    <div class="layui-input-block">
+                        <input th:value="${comment.commentId}" type="text" name="commentId" autocomplete="off"
+                               placeholder="请输入id"
+                               class="layui-input layui-disabled" readonly="readonly">
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">博客id</label>
+                    <div class="layui-input-block">
+                        <input th:value="${comment.blogId}" type="text" name="blogId" autocomplete="off"
+                               placeholder="请输入id"
+                               class="layui-input layui-disabled" readonly="readonly">
+                    </div>
+                </div>
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label">用户id</label>
+                    <div class="layui-input-block">
+                        <input th:value="${comment.userId}" type="text" name="userId" autocomplete="off"
+                               placeholder="请输入id"
+                               class="layui-input layui-disabled" readonly="readonly">
+                    </div>
+                </div>
+
+
+                <!-- 评论是否为根节点  单选框 -->
+                <div class="layui-form-item">
+                    <label class="layui-form-label"><i class="layui-font-red">*</i>根节点</label>
+                    <div class="layui-input-block">
+                        <div th:if="${comment.parentCommentId} eq 0">
+                            <input class="layui-radio" type="radio" name="parentCommentId" value="0"
+                                   th:title="'根节点ID为'+${comment.parentCommentId}"
+                                   th:checked="${comment.parentCommentId==0}" disabled="">
+                            <input class="layui-radio" type="radio" name="parentCommentId" value="1"
+                                   title="父评论ID"
+                                   th:checked="${comment.parentCommentId!=0}" disabled="">
+                        </div>
+                        <div th:if="${comment.parentCommentId} ne 0">
+                            <input class="layui-radio" type="radio" name="parentCommentId" value="0"
+                                   title="根节点"
+                                   th:checked="${comment.parentCommentId==0}" disabled="">
+                            <input class="layui-radio" type="radio" name="parentCommentId" value="1"
+                                   th:title="'父评论ID为'+${comment.parentCommentId}"
+                                   th:checked="${comment.parentCommentId!=0}" disabled="">
+                        </div>
+                    </div>
+
+                    <!-- 评论内容  -->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label"><i class="layui-font-red">*</i>评论内容</label>
+                        <div class="layui-input-block">
+                            <input th:value="${comment.commentContent}" type="text" name="commentContent"
+                                   lay-verify="required" placeholder=""
+                                   autocomplete="off" class="layui-input">
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label class="layui-form-label"><i class="layui-font-red">*</i>点赞数</label>
+                        <div class="layui-input-block">
+                            <input th:value="${comment.commentLikeCount}" type="text" name="commentLikeCount"
+                                   lay-verify="required" placeholder=""
+                                   autocomplete="off" class="layui-input">
+                        </div>
+                    </div>
+
+
+                    <!-- 评论状态  单选框 -->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label"><i class="layui-font-red">*</i>审核状态</label>
+                        <div class="layui-input-block">
+                            <input class="layui-radio" type="radio" name="commentStatus" value="0" title="未审核"
+                                   th:checked="${comment.commentStatus==0}">
+                            <input class="layui-radio" type="radio" name="commentStatus" value="1" title="已审核"
+                                   th:checked="${comment.commentStatus==1}">
+                        </div>
+                    </div>
+
+                    <!-- 评论是否为被删除  单选框 -->
+                    <div class="layui-form-item">
+                        <label class="layui-form-label"><i class="layui-font-red">*</i>是否删除</label>
+                        <div class="layui-input-block">
+                            <input class="layui-radio" type="radio" name="isDeleted" value="0" title="未删除"
+                                   th:checked="${comment.isDeleted==0}">
+                            <input class="layui-radio" type="radio" name="isDeleted" value="1" title="已删除"
+                                   th:checked="${comment.isDeleted==1}">
+                        </div>
+                    </div>
+
+
+                    <div class="layui-form-item">
+                        <div class="layui-input-block">
+                            <button type="submit" class="layui-btn" lay-submit="" lay-filter="demo1">修改</button>
+                        </div>
+                    </div>
+
+            </form>
+
+
+        </main>
+
+    </div>
+    <!--底部固定区域-->
+    <div th:insert="~{common/common::footnav}"></div>
+</div>
+
+
+<script src="/layui/layui.js">
+</script>
+</body>
+</html>

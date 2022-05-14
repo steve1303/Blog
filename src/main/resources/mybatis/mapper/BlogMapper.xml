@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kuang.dao.BlogMapper">
+
+    <resultMap id="blogMap" type="com.kuang.pojo.Blog">
+        <id column="blog_id" property="blogId"/>
+        <result column="blog_title" property="blogTitle"/>
+        <result column="blog_content" property="blogContent"/>
+        <result column="blog_views" property="blogViews"/>
+        <result column="blog_status" property="blogStatus"/>
+        <result column="blog_category" property="blogCategory"/>
+        <result column="blog_alter_time" property="blogAlterTime"/>
+        <result column="blog_creat_date" property="blogCreatDate"/>
+        <result column="user_id" property="userId"/>
+        <association property="blogTagRelation" javaType="com.kuang.pojo.BlogTagRelation">
+            <id column="blog_id" property="blogId"/>
+            <id column="tag_id" property="tagId"/>
+        </association>
+    </resultMap>
+
+    <!-- crud -->
+    <select id="getAllBlogs" resultMap="blogMap">
+        select *
+        from blog
+    </select>
+
+    <!--根据博客id查询博客信息-->
+    <select id="getBlogById" parameterType="int" resultMap="blogMap">
+        select *
+        from blog
+        where blog_id = #{blogId};
+    </select>
+
+    <!-- 创建时间确定 -->
+    <insert id="addBlog" parameterType="com.kuang.pojo.Blog" useGeneratedKeys="true" keyProperty="blogId"
+            keyColumn="blog_id">
+        insert into blog (blog_title, blog_content, blog_views, blog_status, blog_category,
+        blog_alter_time, blog_creat_date, user_id)
+        values (#{blogTitle}, #{blogContent}, #{blogViews}, #{blogStatus}, #{blogCategory},
+        now(), now(), #{userId});
+
+        <selectKey resultType="int" keyProperty="blogId" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+
+    </insert>
+
+    <!-- 修改时间确定 -->
+    <update id="updateBlog" parameterType="com.kuang.pojo.Blog" useGeneratedKeys="true" keyProperty="blogId"
+            keyColumn="blog_id">
+        update blog
+        set blog_id=#{blogId},
+        blog_title=#{blogTitle},
+        blog_content=#{blogContent},
+        blog_views=#{blogViews},
+        blog_status=#{blogStatus},
+        blog_category=#{blogCategory},
+        blog_alter_time=#{blogAlterTime},
+        blog_creat_date=#{blogCreatDate},
+        user_id=#{userId}
+        where blog_id = #{blogId};
+
+        <selectKey resultType="int" keyProperty="blogId" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+
+    </update>
+
+    <delete id="deleteBlogById" parameterType="int">
+        delete
+        from blog
+        where blog_id = #{blogId};
+    </delete>
+
+    <!-- 移动至回收站 -->
+    <update id="removeBlogById" parameterType="int">
+        update blog
+        set blog_status='回收站'
+        where blog_id = #{blogId};
+    </update>
+
+
+    <!--获得标签总数-->
+    <select id="getBlogCount" resultType="int">
+        select count(*)
+        from blog
+    </select>
+
+    <!--查询最新的10条博客-->
+    <select id="getBlogsNew" resultMap="blogMap">
+        SELECT *
+        FROM blog
+        WHERE blog_status = '发布'
+        ORDER BY blog_alter_time desc LIMIT 10;
+    </select>
+
+    <!--查询最热的10条博客-->
+    <select id="getBlogsHot" resultMap="blogMap">
+        SELECT *
+        FROM blog
+        WHERE blog_status = '发布'
+        ORDER BY blog_views desc LIMIT 10;
+    </select>
+
+    <!--根据标签名查询博客-->
+    <select id="getBlogsByTagName" resultMap="blogMap">
+        SELECT *
+        FROM blog
+                 INNER JOIN tag
+                 INNER JOIN blog_tag_relation ON blog.blog_id = blog_tag_relation.blog_id
+            AND tag.tag_id = blog_tag_relation.tag_id
+        WHERE tag.tag_name = #{tagName}
+    </select>
+
+    <!-- 注意用or连接
+    and  有一个字段为null 就查询不到信息了-->
+    <select id="getAllBlogsIfFore" parameterType="String" resultMap="blogMap">
+        select *
+        from blog
+        <where>
+            <if test="keyword != null and keyword !=''">
+                and CONCAT(blog_title, blog_content, blog_views, blog_category) LIKE
+                CONCAT('%',#{keyword},'%')
+            </if>
+        </where>
+    </select>
+
+
+</mapper>

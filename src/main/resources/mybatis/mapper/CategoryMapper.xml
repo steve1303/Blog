@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.kuang.dao.CategoryMapper">
+
+    <resultMap id="categoryMap" type="com.kuang.pojo.Category">
+        <id column="category_id" property="categoryId"/>
+        <result column="category_name" property="categoryName"/>
+        <result column="category_description" property="categoryDescription"/>
+        <result column="is_deleted" property="isDeleted"/>
+        <result column="category_create_time" property="categoryCreateTime"/>
+        <result column="user_id" property="userId"/>
+    </resultMap>
+
+    <!-- crud -->
+    <!--查询全部类别 动态sql 看查询时候有参数 self-->
+    <select id="getAllCategories" resultMap="categoryMap">
+        select *
+        from category
+    </select>
+
+    <select id="getCategoryById" parameterType="int" resultMap="categoryMap">
+        select *
+        from category
+        where category_id = #{categoryId};
+    </select>
+
+    <insert id="addCategory" parameterType="com.kuang.pojo.Category">
+        insert into category (category_id, category_name, category_description, is_deleted, category_create_time,
+                              user_id)
+        values (#{categoryId}, #{categoryName}, #{categoryDescription}, #{isDeleted}, now(), #{userId});
+    </insert>
+
+    <update id="updateCategory" parameterType="com.kuang.pojo.Category">
+        update category
+        set category_id=#{categoryId},
+            category_name=#{categoryName},
+            category_description=#{categoryDescription},
+            is_deleted=#{isDeleted},
+            category_create_time=#{categoryCreateTime},
+            user_id=#{userId}
+        where category_id = #{categoryId};
+    </update>
+
+    <delete id="deleteCategoryById" parameterType="int">
+        delete
+        from category
+        where category_id = #{categoryId};
+    </delete>
+
+
+    <!-- 根据用户id查询博客分类-->
+    <select id="getAllCategoryByUserId" parameterType="int" resultMap="categoryMap">
+        select *
+        from category
+        where user_id = #{userId}
+    </select>
+
+    <!--获得分类总数-->
+    <select id="getCategoryCount" resultType="int">
+        select count(*)
+        from category
+    </select>
+
+</mapper>
